@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Sidebar from "./sidebar"
 import BottomNav from "./bottom-nav"
 
@@ -15,7 +15,31 @@ interface AppLayoutProps {
 
 
 export default function AppLayout({ children, }: AppLayoutProps) {
+
+
   const [activeSection, setActiveSection] = useState("home")
+
+
+useEffect(() => {
+  const preventZoom = (e: WheelEvent | TouchEvent) => {
+    // Ctrl + wheel (desktop zoom)
+    if (e instanceof WheelEvent && e.ctrlKey) {
+      e.preventDefault()
+    }
+    // Touch pinch (mobile)
+    if (e instanceof TouchEvent && e.touches.length > 1) {
+      e.preventDefault()
+    }
+  }
+
+  document.addEventListener("wheel", preventZoom, { passive: false })
+  document.addEventListener("touchmove", preventZoom, { passive: false })
+
+  return () => {
+    document.removeEventListener("wheel", preventZoom)
+    document.removeEventListener("touchmove", preventZoom)
+  }
+}, [])
 
 
   return (
