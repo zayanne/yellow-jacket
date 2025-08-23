@@ -1,7 +1,5 @@
 {
   "name": "v-2",
-  "display": "standalone",
-  "start_url": "/",
   "version": "0.1.0",
   "private": true,
   "scripts": {
