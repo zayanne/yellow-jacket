@@ -12,9 +12,11 @@ function generateRandomName(length = 6) {
   return `Anonymous_${result}`
 }
 
-export async function getOrCreateFallbackName() {
+export async function getOrCreateFallbackName(): Promise<string> {
+  // If running on server (SSR/Node), just return "Anonymous"
   if (typeof window === "undefined") return "Anonymous"
 
+  // Check if we already have a saved fallback name
   const existing = localStorage.getItem(FALLBACK_KEY)
   if (existing && existing.trim() !== "") return existing
 
@@ -22,7 +24,7 @@ export async function getOrCreateFallbackName() {
   let isUnique = false
 
   while (!isUnique) {
-    name = generateRandomName(6) // random 6 chars
+    name = generateRandomName(6) // generate random 6 chars
 
     const { count, error } = await supabase
       .from("public_chat")
@@ -31,7 +33,8 @@ export async function getOrCreateFallbackName() {
 
     if (error) {
       console.error("Error checking name uniqueness:", error)
-      break // fallback: accept generated name anyway
+      // fallback: accept the generated name even if not unique
+      break
     }
 
     if ((count ?? 0) === 0) {

@@ -1,19 +1,34 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { useUser } from "@/contexts/user-context"
 import { MessageCircle } from "lucide-react"
 import MessageList from "./MessageList"
 import MessageInput from "./MessageInput"
 import EditNameDialog from "./EditNameDialog"
 import { Button } from "@/components/ui/button"
+import { getOrCreateFallbackName } from "@/lib/fallback-name"
+import { cn } from "@/lib/utils"
 
 export default function BlipBox() {
   const { identity } = useUser()
   const [mounted, setMounted] = useState(false)
   const [nameDialogOpen, setNameDialogOpen] = useState(false)
+  const [fallbackName, setFallbackName] = useState<string>("")
+  const [mentionUser, setMentionUser] = useState<string | null>(null)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => setMounted(true), [])
+
+  useEffect(() => {
+    const loadName = async () => {
+      const name = await getOrCreateFallbackName()
+      setFallbackName(name)
+    }
+    loadName()
+  }, [])
+
+  const handleReply = (username: string) => setMentionUser(username)
 
   if (!mounted) {
     return (
@@ -26,7 +41,7 @@ export default function BlipBox() {
     )
   }
 
-  const displayName = identity.displayName || identity.id.slice(-6)
+  const displayName = identity.displayName || fallbackName
 
   return (
     <div className="h-screen w-full flex flex-col bg-background text-foreground">
@@ -40,27 +55,38 @@ export default function BlipBox() {
             <div className="leading-tight">
               <h1 className="text-lg font-semibold">Anonymous Chat</h1>
               <p className="text-sm text-muted-foreground">
-                Chatting as <span className="font-medium text-primary">{displayName}</span>
+                Chatting as{" "}
+                <span className="font-medium text-primary">{displayName}</span>
               </p>
             </div>
           </div>
-          <Button variant="ghost" size="sm" onClick={() => setNameDialogOpen(true)} className="text-muted-foreground hover:text-foreground">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setNameDialogOpen(true)}
+            className="text-muted-foreground hover:text-foreground"
+          >
             Change name
           </Button>
         </div>
       </header>
 
-      {/* Messages (scrollable) */}
-      <main className="flex-1 min-h-0">
-        <div className="mx-auto h-full">
-          <MessageList />
-        </div>
+      {/* Messages */}
+      <main className="flex-1 overflow-auto px-4 sm:px-6 pb-[70px] lg:pb-0">
+        <MessageList onReply={handleReply} />
+        <div ref={messagesEndRef} />
       </main>
 
-      {/* Message Input (pinned) */}
-      <footer className="sticky bottom-0 z-20 border-t border-border/30 bg-card/70 backdrop-blur-xl px-4 sm:px-6 py-3">
+      {/* Message Input */}
+      <footer
+        className={cn(
+          "px-4 sm:px-6 py-3 z-20 bg-card/70 border-t border-border/30 backdrop-blur-xl",
+          // mobile: fixed above BottomNav, desktop: sticky
+          "fixed bottom-[70px] left-0 w-full lg:relative lg:bottom-0"
+        )}
+      >
         <div className="mx-auto">
-          <MessageInput />
+          <MessageInput mentionUser={mentionUser} />
         </div>
       </footer>
 
