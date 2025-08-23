@@ -2,12 +2,13 @@
 
 import { useEffect, useState, useRef } from "react"
 import { useUser } from "@/contexts/user-context"
-import {  ArrowLeft,  } from "lucide-react"
+import { ArrowLeft } from "lucide-react"
 import MessageList from "./MessageList"
 import MessageInput from "./MessageInput"
 import EditNameDialog from "./EditNameDialog"
 import { Button } from "@/components/ui/button"
 import { getOrCreateFallbackName } from "@/lib/fallback-name"
+import { cn } from "@/lib/utils"
 
 export default function BlipBox() {
   const { identity } = useUser()
@@ -43,47 +44,72 @@ export default function BlipBox() {
   const displayName = identity.displayName || fallbackName
 
   return (
-   <div className="h-screen w-full flex flex-col bg-background text-foreground z-40 overflow-y-hidden">
-  {/* Header */}
-  <header className="flex-shrink-0 sticky top-0 z-20 border-b border-border/30 bg-card/80 backdrop-blur-xl">
-    <div className="mx-auto px-6 py-4 flex items-center justify-between">
-      <div className="flex items-center gap-3">
-        <Button className="bg-transparent ">
-          <ArrowLeft className="h-5 text-foreground "   />
-        </Button>
-        <div className="leading-tight">
-          <h1 className="text-lg font-semibold">Anonymous Chat</h1>
-          <p className="text-sm text-muted-foreground hidden md:block">
-            Chatting as <span className="font-medium text-primary">{displayName}</span>
-          </p>
-        </div>
-      </div>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => setNameDialogOpen(true)}
-        className="text-muted-foreground hover:text-foreground"
+    <div
+      className={cn(
+        "flex flex-col h-screen w-full bg-background text-foreground overflow-hidden min-h-0"
+      )}
+    >
+      {/* Header */}
+      <header
+        className={cn(
+          "flex-shrink-0 border-b border-border/30 bg-card/80 backdrop-blur-xl sticky top-0 z-20"
+        )}
       >
-        Change name
-      </Button>
+        <div className="px-4 sm:px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="bg-transparent"
+            >
+              <ArrowLeft className="h-5 text-foreground" />
+            </Button>
+            <div className="leading-tight">
+              <h1 className="text-lg font-semibold">Anonymous Chat</h1>
+              <p className="text-sm text-muted-foreground hidden md:block">
+                Chatting as{" "}
+                <span className="font-medium text-primary">{displayName}</span>
+              </p>
+            </div>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setNameDialogOpen(true)}
+            className="text-muted-foreground hover:text-foreground"
+          >
+            Change name
+          </Button>
+        </div>
+      </header>
+
+      {/* Messages - ONLY SCROLLABLE AREA */}
+      <main
+        className={cn(
+          "flex-1 overflow-y-auto px-4 sm:px-6 py-3 min-h-0",
+          // 👇 ensures last messages are never hidden behind input
+          "pb-40"
+        )}
+      >
+        <MessageList onReply={handleReply} />
+        <div ref={messagesEndRef} />
+      </main>
+
+      {/* Input - FIXED to bottom */}
+      <footer
+        className={cn(
+          "fixed bottom-0 left-0 right-0 z-20 px-4 sm:px-6 py-3",
+          "bg-card/80 border-t border-border/30 backdrop-blur-xl",
+          "pb-[calc(env(safe-area-inset-bottom)+0.75rem)]"
+        )}
+      >
+        <MessageInput mentionUser={mentionUser} />
+      </footer>
+
+      <EditNameDialog
+        open={nameDialogOpen}
+        onOpenChange={setNameDialogOpen}
+      />
     </div>
-  </header>
-
-  {/* Messages */}
-  <main className="flex-1 overflow-y-auto flex flex-col">
-    <MessageList onReply={handleReply} />
-    <div ref={messagesEndRef} />
-  </main>
-
-  {/* Message Input */}
-  <footer className="flex-shrink-0 px-4 sm:px-6 py-3 z-60 bg-card/70 border-t border-border/30 backdrop-blur-xl sticky bottom-0">
-    <div className="mx-auto">
-      <MessageInput mentionUser={mentionUser} />
-    </div>
-  </footer>
-
-  <EditNameDialog open={nameDialogOpen} onOpenChange={setNameDialogOpen} />
-</div>
-
   )
 }
