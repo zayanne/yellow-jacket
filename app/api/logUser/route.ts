@@ -47,9 +47,7 @@ export async function POST(req: NextRequest) {
     const { data, error } = await supabase.from("user_logs").insert([
       {
         user_id,
-        ip: anonIp,
-        timestamp: new Date(),
-      },
+        ip: anonIp,      },
     ]);
 
     if (error) {
