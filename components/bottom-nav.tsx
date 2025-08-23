@@ -1,6 +1,7 @@
 "use client"
 
-import { Home, PlusCircle, MessageCircle, TrendingUp, User } from "lucide-react"
+import Link from "next/link"
+import { Home, PlusCircle, MessageCircle, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
@@ -11,24 +12,32 @@ interface BottomNavProps {
   onSectionChange?: (section: string) => void
 }
 
+type MenuItem = {
+  id: string
+  label: string
+  icon: React.ElementType
+  href?: string
+  action?: "create" | "profile"
+}
+
 export default function BottomNav({
   onCreatePost,
   onOpenProfile,
   activeSection = "home",
   onSectionChange,
 }: BottomNavProps) {
-  const menuItems = [
-    { id: "home", label: "Home", icon: Home, href:"/" },
+  const menuItems: MenuItem[] = [
+    { id: "home", label: "Home", icon: Home, href: "/" },
     { id: "create", label: "Create", icon: PlusCircle, action: "create" },
-    { id: "Blip", label: "Blip", icon: MessageCircle, href:"/blip" },
+    { id: "blip", label: "Blip", icon: MessageCircle, href: "/blip" },
     { id: "profile", label: "Profile", icon: User, action: "profile" },
   ]
 
-  const handleItemClick = (item: any) => {
+  const handleItemClick = (item: MenuItem) => {
     if (item.action === "create") {
-      // onCreatePost()
+      onCreatePost?.()
     } else if (item.action === "profile") {
-      // onOpenProfile()
+      onOpenProfile?.()
     } else {
       onSectionChange?.(item.id)
     }
@@ -37,22 +46,38 @@ export default function BottomNav({
   return (
     <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50">
       <div className="flex items-center justify-around py-2 px-4">
-        {menuItems.map((item) => (
-          <Button
-            key={item.id}
-            variant="ghost"
-            size="sm"
-            className={cn(
-              "flex flex-col items-center gap-1 h-auto py-2 px-3 text-xs",
-              activeSection === item.id && !item.action && "text-primary",
-              (item.action === "create" || item.action === "profile") && "text-primary",
-            )}
-            onClick={() => handleItemClick(item)}
-          >
-            <item.icon className={cn("w-5 h-5", item.action === "create" && "w-6 h-6")} />
-            <span className="text-xs">{item.label}</span>
-          </Button>
-        ))}
+        {menuItems.map((item) => {
+          const isActive = activeSection === item.id
+
+          const button = (
+            <Button
+              key={item.id}
+              variant="ghost"
+              size="sm"
+              className={cn(
+                "flex flex-col items-center gap-1 h-auto py-2 px-3 text-xs",
+                isActive && "text-primary"
+              )}
+              onClick={() => handleItemClick(item)}
+            >
+              <item.icon
+                className={cn(
+                  "w-5 h-5",
+                  item.action === "create" && "w-6 h-6"
+                )}
+              />
+              <span className="text-xs">{item.label}</span>
+            </Button>
+          )
+
+          return item.href ? (
+            <Link key={item.id} href={item.href}>
+              {button}
+            </Link>
+          ) : (
+            button
+          )
+        })}
       </div>
     </div>
   )
