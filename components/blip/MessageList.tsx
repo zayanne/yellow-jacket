@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { useUser } from "@/contexts/user-context"
 import { supabase } from "@/lib/supabase/client"
+import { format } from "date-fns"
+
 
 type Message = {
   id: string
@@ -43,6 +45,21 @@ export default function MessageList() {
     if (el) el.scrollTop = el.scrollHeight
   }, [messages])
 
+  function renderMessageText(text: string) {
+  const mentionRegex = /(@\w+)/g
+  const parts = text.split(mentionRegex)
+
+  return parts.map((part, i) =>
+    mentionRegex.test(part) ? (
+      <span key={i} className="text-blue-500 font-medium">
+        {part}
+      </span>
+    ) : (
+      <React.Fragment key={i}>{part}</React.Fragment>
+    )
+  )
+}
+
   return (
     <div
       ref={containerRef}
@@ -76,10 +93,12 @@ export default function MessageList() {
                         : "bg-muted/80 text-foreground border-border/30 hover:shadow-md"
                     )}
                   >
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{msg.message}</p>
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
+  {renderMessageText(msg.message)}
+</p>
+
                     <p className="mt-2 text-[10px] opacity-60">
-                      {new Date(msg.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                    </p>
+                      {format(new Date(msg.created_at), "hh:mm a")}                    </p>
                   </div>
                 </div>
               </motion.div>

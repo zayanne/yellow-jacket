@@ -1,15 +1,44 @@
 // lib/fallback-name.ts
-const FALLBACK_KEY = "anon_fallback_name";
-const COUNTER_KEY = "anon_counter";
+import { supabase } from "@/lib/supabase/client"
 
-export function getOrCreateFallbackName() {
-  if (typeof window === "undefined") return "Anonymous";
-  const existing = localStorage.getItem(FALLBACK_KEY);
-  if (existing && existing.trim() !== "") return existing;
+const FALLBACK_KEY = "anon_fallback_name"
 
-  const count = Number(localStorage.getItem(COUNTER_KEY) || "1");
-  const name = `Anonymous_${count}`;
-  localStorage.setItem(FALLBACK_KEY, name);
-  localStorage.setItem(COUNTER_KEY, String(count + 1));
-  return name;
+function generateRandomName(length = 6) {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+  let result = ""
+  for (let i = 0; i < length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length))
+  }
+  return `Anonymous_${result}`
+}
+
+export async function getOrCreateFallbackName() {
+  if (typeof window === "undefined") return "Anonymous"
+
+  const existing = localStorage.getItem(FALLBACK_KEY)
+  if (existing && existing.trim() !== "") return existing
+
+  let name = ""
+  let isUnique = false
+
+  while (!isUnique) {
+    name = generateRandomName(6) // random 6 chars
+
+    const { count, error } = await supabase
+      .from("public_chat")
+      .select("author_name", { count: "exact", head: true })
+      .eq("author_name", name)
+
+    if (error) {
+      console.error("Error checking name uniqueness:", error)
+      break // fallback: accept generated name anyway
+    }
+
+    if ((count ?? 0) === 0) {
+      isUnique = true
+    }
+  }
+
+  localStorage.setItem(FALLBACK_KEY, name)
+  return name
 }
