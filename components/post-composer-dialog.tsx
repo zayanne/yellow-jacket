@@ -99,7 +99,7 @@ export default function PostComposerDialog({ open, onOpenChange, onPostCreated }
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-md w-full mx-4">
+      {/* <DialogContent className="sm:max-w-md w-full mx-4">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold text-foreground">Share Your Thoughts</DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
@@ -181,7 +181,25 @@ export default function PostComposerDialog({ open, onOpenChange, onPostCreated }
             </Button>
           </div>
         </form>
+      </DialogContent> */}
+        <DialogContent className="sm:max-w-md w-full mx-4">
+        <DialogHeader>
+          <DialogTitle className="text-xl font-semibold text-foreground">
+            Post Composer (Coming Soon)
+          </DialogTitle>
+          <DialogDescription className="text-sm text-muted-foreground mt-2">
+            🚧 This feature is temporarily under maintenance. You cannot post at the moment.
+            It will be available soon. Thank you for your patience!
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="mt-6 flex flex-col gap-3 text-center">
+          <Button disabled className="cursor-not-allowed">
+            Feature Disabled
+          </Button>
+        </div>
       </DialogContent>
+      
     </Dialog>
   )
 }

@@ -36,7 +36,7 @@ export default function Sidebar() {
         <Button onClick={handleCreatePost} className="w-full mb-6" size="lg">
           <PlusCircle className="w-5 h-5 mr-2" />
           Create Post
-        </Button>
+        </Button> 
 
         <nav className="flex-1 space-y-2">
           {menuItems.map((item) => (

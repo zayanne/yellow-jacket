@@ -9,9 +9,12 @@ import EditNameDialog from "./EditNameDialog"
 import { Button } from "@/components/ui/button"
 import { getOrCreateFallbackName } from "@/lib/fallback-name"
 import { cn } from "@/lib/utils"
+import { useRouter } from "next/navigation"
 
 export default function BlipBox() {
   const { identity } = useUser()
+    const router = useRouter();
+
   const [mounted, setMounted] = useState(false)
   const [nameDialogOpen, setNameDialogOpen] = useState(false)
   const [fallbackName, setFallbackName] = useState<string>("")
@@ -61,6 +64,7 @@ export default function BlipBox() {
               variant="ghost"
               size="icon"
               className="bg-transparent"
+              onClick={() => {router.push('/')}}
             >
               <ArrowLeft className="h-5 text-foreground" />
             </Button>
