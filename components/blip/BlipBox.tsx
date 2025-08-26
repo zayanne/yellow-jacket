@@ -13,7 +13,7 @@ import { useRouter } from "next/navigation"
 
 export default function BlipBox() {
   const { identity } = useUser()
-    const router = useRouter();
+  const router = useRouter()
 
   const [mounted, setMounted] = useState(false)
   const [nameDialogOpen, setNameDialogOpen] = useState(false)
@@ -35,7 +35,7 @@ export default function BlipBox() {
 
   if (!mounted) {
     return (
-      <div className="h-screen w-full flex items-center justify-center">
+      <div className="h-full w-full flex items-center justify-center">
         <div className="flex items-center gap-2 text-muted-foreground">
           <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
           <span className="text-sm">Loading chat...</span>
@@ -47,24 +47,16 @@ export default function BlipBox() {
   const displayName = identity.displayName || fallbackName
 
   return (
-    <div
-      className={cn(
-        "flex flex-col h-screen w-full bg-background text-foreground overflow-hidden min-h-0"
-      )}
-    >
+    <div className="relative h-screen w-full bg-background text-foreground overflow-hidden">
       {/* Header */}
-      <header
-        className={cn(
-          "flex-shrink-0 border-b border-border/30 bg-card/80 backdrop-blur-xl sticky top-0 z-20"
-        )}
-      >
+      <header className="fixed top-0 right-0 left-0 lg:left-64 z-20 border-b border-border/30 bg-card/80 backdrop-blur-xl">
         <div className="px-4 sm:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Button
               variant="ghost"
               size="icon"
               className="bg-transparent"
-              onClick={() => {router.push('/')}}
+              onClick={() => router.push("/")}
             >
               <ArrowLeft className="h-5 text-foreground" />
             </Button>
@@ -87,33 +79,30 @@ export default function BlipBox() {
         </div>
       </header>
 
-      {/* Messages - ONLY SCROLLABLE AREA */}
+      {/* Messages */}
       <main
         className={cn(
-          "flex-1 overflow-y-auto px-4 sm:px-6 py-3 min-h-0",
-          // 👇 ensures last messages are never hidden behind input
-          "pb-40"
+          "absolute right-0 left-0", // 👈 respect sidebar
+          "top-[64px]", // header height
+          "bottom-[72px]", // footer height
+          "overflow-y-auto sm:overflow-y-auto", // desktop scroll
+          "py-3"
+          
         )}
       >
         <MessageList onReply={handleReply} />
         <div ref={messagesEndRef} />
       </main>
 
-      {/* Input - FIXED to bottom */}
-      <footer
-        className={cn(
-          "fixed bottom-0 left-0 right-0 z-20 px-4 sm:px-6 py-3",
-          "bg-card/80 border-t border-border/30 backdrop-blur-xl",
-          "pb-[calc(env(safe-area-inset-bottom)+0.75rem)]"
-        )}
-      >
+      {/* Footer */}
+      <footer className="fixed bottom-0 right-0 left-0 lg:left-64 z-20 px-4 sm:px-6 py-3 bg-card/80 border-t border-border/30 backdrop-blur-xl pb-[calc(env(safe-area-inset-bottom)+0.75rem)]">
         <MessageInput mentionUser={mentionUser} />
       </footer>
 
-      <EditNameDialog
-        open={nameDialogOpen}
-        onOpenChange={setNameDialogOpen}
-      />
+      <EditNameDialog open={nameDialogOpen} onOpenChange={setNameDialogOpen} />
     </div>
   )
 }
+
+
+

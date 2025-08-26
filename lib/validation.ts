@@ -1,7 +1,7 @@
 import leoProfanity from "leo-profanity";
 
 leoProfanity.loadDictionary();
-leoProfanity.add(["oke"]); // custom words
+leoProfanity.add(["thayoli"]); // custom words
 
 // Censor individual words
 export function censorWord(word: string) {
@@ -20,19 +20,22 @@ function normalizeText(text: string) {
 
 // Filter message
 export function filterMessage(message: string): { allowed: boolean; output: string } {
-  const words = message.split(/\s+/);
+  // Keep newlines while censoring
+  const words = message.split(/(\s+)/); // <-- keeps spaces & newlines in array
 
-  // Check banned phrases (even partially censored)
   const bannedPhrases = ["fuck you", "shit you"];
   const normalized = normalizeText(message);
 
   const isBlocked = bannedPhrases.some((phrase) => normalized.includes(phrase));
 
-  // Censor individual bad words
-  const filtered = words.map((word) => (leoProfanity.check(word) ? censorWord(word) : word));
+  // Censor bad words but keep whitespace/newlines untouched
+  const filtered = words.map((word) =>
+    leoProfanity.check(word.trim()) ? censorWord(word.trim()) + word.slice(word.trim().length) : word
+  );
 
   return {
     allowed: !isBlocked,
-    output: filtered.join(" "),
+    output: filtered.join(""), // join without collapsing whitespace
   };
 }
+

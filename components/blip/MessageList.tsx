@@ -97,12 +97,12 @@ export default function MessageList({ onReply }: { onReply: (username: string) =
                 transition={{ duration: 0.25 }}
                 className={cn("flex gap-3", isMe ? "justify-end" : "justify-start")}
               >
-                <div className={cn("flex flex-col", isMe && "items-end")}>
-                  {!isMe && (
+                <div className={cn("flex flex-col", isMe && "items-start")}>
+                  
                     <span className="text-xs text-muted-foreground mb-1 ml-1">
                       {msg.author_name}
                     </span>
-                  )}
+                  
 
                   <div className="flex relative">
                     <div

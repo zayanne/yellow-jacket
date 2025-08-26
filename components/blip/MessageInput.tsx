@@ -22,6 +22,7 @@ export default function MessageInput({ mentionUser }: Props) {
   const [warningText, setWarningText] = React.useState("")
   const textareaRef = React.useRef<HTMLTextAreaElement>(null)
 
+  // Pre-fill @mention
   React.useEffect(() => {
     if (mentionUser) {
       setValue((prev) => `${prev}${prev ? " " : ""}@${mentionUser} `)
@@ -33,20 +34,16 @@ export default function MessageInput({ mentionUser }: Props) {
     }
   }, [mentionUser])
 
-  // -------------------
-  // LIVE VALIDATION
-  // -------------------
+  // Handle input changes
   const onChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const input = e.target.value
-
-    // Run filterMessage: returns censored output and allowed status
     const { allowed, output } = filterMessage(input)
 
-    setValue(output)          // live censor bad words
-    setIsAllowed(allowed)     // track if fully allowed
+    setValue(output)
+    setIsAllowed(allowed)
     setWarningText(allowed ? "" : "This message contains disallowed content!")
 
-    // Auto resize
+    // Auto resize height
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto"
       textareaRef.current.style.height = `${Math.min(
@@ -56,6 +53,7 @@ export default function MessageInput({ mentionUser }: Props) {
     }
   }
 
+  // Send message
   const send = async () => {
     const text = value.trim()
     if (!text || sending || !isAllowed) return
@@ -71,6 +69,7 @@ export default function MessageInput({ mentionUser }: Props) {
         },
       ])
       if (error) console.error(error.message)
+
       setValue("")
       setIsAllowed(true)
       setWarningText("")
@@ -80,23 +79,26 @@ export default function MessageInput({ mentionUser }: Props) {
     }
   }
 
-  const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault()
-      void send()
-    }
+  // Key handling: Enter = send, Shift+Enter = newline
+const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault()
+    void send()
   }
+}
+
 
   return (
     <div className="w-full">
       <div
         className={cn(
-          "relative flex items-center gap-3 p-3 rounded-2xl border transition-all duration-300",
+          "relative flex items-end gap-3 p-3 rounded-2xl border transition-all duration-300",
           "bg-gradient-to-r from-chat-input-bg/90 to-muted/50 backdrop-blur-sm",
           "border-chat-input-border/50 shadow-sm",
           focused && "border-chat-input-focus/60 shadow-[var(--shadow-input)] scale-[1.01]"
         )}
       >
+        {/* Attachment button (disabled for now) */}
         <Button
           type="button"
           variant="ghost"
@@ -107,6 +109,7 @@ export default function MessageInput({ mentionUser }: Props) {
           <Paperclip className="h-4 w-4 text-chat-attachment group-hover:text-primary transition-colors" />
         </Button>
 
+        {/* Textarea */}
         <div className="relative flex flex-1 flex-col">
           <textarea
             ref={textareaRef}
@@ -118,40 +121,35 @@ export default function MessageInput({ mentionUser }: Props) {
             placeholder="Type a message..."
             rows={1}
             className={cn(
-              "w-full bg-transparent px-3 py-2 pr-12 resize-none overflow-hidden",
+              "w-full bg-transparent px-3 py-2 resize-none overflow-y-auto",
               "placeholder:text-muted-foreground/60",
               "text-sm leading-relaxed focus:outline-none",
               "scrollbar-thin scrollbar-thumb-muted-foreground/20"
             )}
-            style={{ maxHeight: "120px" }}
           />
 
           {warningText && (
-            <span className="text-red-500 text-xs mt-1 absolute bottom-[-1.2rem] left-3">
-              {warningText}
-            </span>
+            <span className="text-red-500 text-xs mt-1 px-3">{warningText}</span>
           )}
         </div>
 
+        {/* Send button */}
         <Button
           type="button"
           onClick={send}
           disabled={sending || value.trim() === "" || !isAllowed}
           size="icon"
           className={cn(
-            "group",
-            "absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 rounded-xl",
+            "group shrink-0 h-9 w-9 rounded-xl",
             "bg-gradient-to-r from-chat-send-bg to-primary-glow",
             "hover:from-chat-send-hover hover:to-primary shadow-[var(--shadow-send)]",
             "border border-primary/20",
             "disabled:opacity-50"
           )}
         >
-          <SendHorizontal className="h-3.5 w-3.5 text-white group-hover:text-black transition-colors" />
+          <SendHorizontal className="h-4 w-4 text-black dark:text-white group-hover:text-black transition-colors" />
         </Button>
       </div>
     </div>
   )
 }
-
-
