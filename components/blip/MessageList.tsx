@@ -8,12 +8,20 @@ import { supabase } from "@/lib/supabase/client"
 import { format } from "date-fns"
 import { ActionsMenu } from "./ActionsMenu"
 
+type NameStyle = {
+  type: string
+  color: string
+  effect?: string
+  font_weight?: string
+}
+
 type Message = {
   id: string
   author_name: string
   message: string
   user_id: string
   created_at: string
+  name_style?: NameStyle | null
 }
 
 export default function MessageList({ onReply }: { onReply: (username: string) => void }) {
@@ -23,21 +31,71 @@ export default function MessageList({ onReply }: { onReply: (username: string) =
 
   React.useEffect(() => {
     const load = async () => {
-      const { data } = await supabase
+      // 1. Fetch registered users with their style + current display_name
+      const { data: users } = await supabase
+        .from("registered_users")
+        .select("user_id, display_name, name_style")
+
+      const userStyles = new Map(
+        users?.map(u => [
+          u.user_id,
+          { style: u.name_style, display_name: u.display_name },
+        ]) ?? []
+      )
+
+      // 2. Fetch all chat messages
+      const { data: msgs } = await supabase
         .from("public_chat")
         .select("*")
         .order("created_at", { ascending: true })
-      setMessages(data || [])
+
+      setMessages(
+        (msgs || []).map((m) => {
+          const user = userStyles.get(m.user_id)
+          return {
+            ...m,
+            name_style:
+              user &&
+                user.display_name &&
+                user.display_name.toLowerCase() === m.author_name.toLowerCase()
+                ? user.style
+                : null,
+
+          }
+        })
+      )
     }
     load()
 
+    // 3. Listen for new messages
     const channel = supabase
       .channel("public_chat")
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "public_chat" },
-        (payload) => {
-          setMessages((prev) => [...prev, payload.new as Message])
+        async (payload) => {
+          const newMsg = payload.new as Message
+
+          // Get user style + display_name
+          const { data: user } = await supabase
+            .from("registered_users")
+            .select("display_name, name_style")
+            .eq("user_id", newMsg.user_id)
+            .maybeSingle()
+
+          setMessages((prev) => [
+            ...prev,
+            {
+              ...newMsg,
+              name_style:
+                user &&
+                  user.display_name &&
+                  user.display_name.toLowerCase() === newMsg.author_name.toLowerCase()
+                  ? user.name_style
+                  : null,
+
+            },
+          ])
         }
       )
       .subscribe()
@@ -65,13 +123,30 @@ export default function MessageList({ onReply }: { onReply: (username: string) =
           {part}
         </span>
       ) : (
-        <span
-          key={i}
-          className={isMe ? "" : "text-sm"}
-        >
+        <span key={i} className={isMe ? "" : "text-sm"}>
           {part}
         </span>
       )
+    )
+  }
+
+  function renderStyledName(name: string, style?: NameStyle | null) {
+    if (!style) {
+      return <span className="text-xs text-muted-foreground">{name}</span>
+    }
+
+    return (
+      <span
+        className="text-xs mb-1 ml-1"
+        style={{
+          color: style.color,
+          fontWeight: style.font_weight || "normal",
+          textTransform: style.effect === "uppercase" ? "uppercase" : undefined,
+          letterSpacing: style.effect === "sharp_edges" ? "0.05em" : undefined,
+        }}
+      >
+        {name}
+      </span>
     )
   }
 
@@ -98,11 +173,7 @@ export default function MessageList({ onReply }: { onReply: (username: string) =
                 className={cn("flex gap-3", isMe ? "justify-end" : "justify-start")}
               >
                 <div className={cn("flex flex-col", isMe && "items-start")}>
-                  
-                    <span className="text-xs text-muted-foreground mb-1 ml-1">
-                      {msg.author_name}
-                    </span>
-                  
+                  {renderStyledName(msg.author_name, msg.name_style)}
 
                   <div className="flex relative">
                     <div

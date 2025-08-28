@@ -10,6 +10,7 @@ import { User, Calendar, MessageCircle } from "lucide-react"
 import { useUser } from "@/contexts/user-context"
 import { formatDistanceToNow } from "date-fns"
 import { toast } from "sonner"
+import { validateDisplayName } from "@/actions/validateDisplayName"
 
 interface UserProfileDialogProps {
   open: boolean
@@ -19,17 +20,34 @@ interface UserProfileDialogProps {
 export default function UserProfileDialog({ open, onOpenChange }: UserProfileDialogProps) {
   const { identity, updateDisplayName } = useUser()
   const [displayName, setDisplayName] = useState(identity.displayName)
+  const [validation, setValidation] = useState<{ valid: boolean; message: string } | null>(null)
+
+  const handleValidate = async (name: string) => {
+    setDisplayName(name)
+    if (!name.trim()) {
+      setValidation(null)
+      return
+    }
+
+    const result = await validateDisplayName(name, identity.id)
+    setValidation(result)
+  }
 
   const handleSave = () => {
-    updateDisplayName(displayName)
-    toast.success("Profile updated",{
-      description: "Your display name has been saved.",
-    })
-    onOpenChange(false)
+    if (validation?.valid) {
+      updateDisplayName(displayName)
+      toast.success("Profile updated", {
+        description: "Your display name has been saved.",
+      })
+      onOpenChange(false)
+    } else {
+      toast.error(validation?.message || "Please fix errors before saving")
+    }
   }
 
   const handleCancel = () => {
     setDisplayName(identity.displayName)
+    setValidation(null)
     onOpenChange(false)
   }
 
@@ -69,16 +87,25 @@ export default function UserProfileDialog({ open, onOpenChange }: UserProfileDia
 
           <div className="space-y-3">
             <Label htmlFor="display-name" className="text-sm font-medium">
-              Display Name ho
+              Display Name
             </Label>
             <Input
               id="display-name"
               placeholder="Enter your preferred name"
               value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
+              onChange={(e) => handleValidate(e.target.value)}
               maxLength={50}
               className="bg-input border-border"
             />
+            {validation && (
+              <p
+                className={`text-xs mt-1 ${
+                  validation.valid ? "text-green-600" : "text-red-600"
+                }`}
+              >
+                {validation.message}
+              </p>
+            )}
             <p className="text-xs text-muted-foreground">
               This name will be used for your posts and comments. Leave empty to remain "Anonymous".
             </p>
