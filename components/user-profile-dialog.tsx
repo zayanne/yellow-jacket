@@ -4,7 +4,13 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { User, Calendar, MessageCircle } from "lucide-react"
 import { useUser } from "@/contexts/user-context"
@@ -21,6 +27,7 @@ export default function UserProfileDialog({ open, onOpenChange }: UserProfileDia
   const { identity, updateDisplayName } = useUser()
   const [displayName, setDisplayName] = useState(identity.displayName)
   const [validation, setValidation] = useState<{ valid: boolean; message: string } | null>(null)
+  const [loading, setLoading] = useState(false)
 
   const handleValidate = async (name: string) => {
     setDisplayName(name)
@@ -29,19 +36,27 @@ export default function UserProfileDialog({ open, onOpenChange }: UserProfileDia
       return
     }
 
+    setLoading(true)
     const result = await validateDisplayName(name, identity.id)
     setValidation(result)
+    setLoading(false)
   }
 
-  const handleSave = () => {
-    if (validation?.valid) {
-      updateDisplayName(displayName)
+  const handleSave = async () => {
+    // Always recheck at save time to avoid race conditions
+    setLoading(true)
+    const result = await validateDisplayName(displayName, identity.id)
+    setValidation(result)
+    setLoading(false)
+
+    if (result.valid) {
+      updateDisplayName(displayName.trim())
       toast.success("Profile updated", {
         description: "Your display name has been saved.",
       })
       onOpenChange(false)
     } else {
-      toast.error(validation?.message || "Please fix errors before saving")
+      toast.error(result.message || "Please fix errors before saving")
     }
   }
 
@@ -55,7 +70,9 @@ export default function UserProfileDialog({ open, onOpenChange }: UserProfileDia
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md w-full mx-4">
         <DialogHeader>
-          <DialogTitle className="text-xl font-semibold text-foreground">Your Profile</DialogTitle>
+          <DialogTitle className="text-xl font-semibold text-foreground">
+            Your Profile
+          </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
             Manage your anonymous identity and preferences.
           </DialogDescription>
@@ -80,7 +97,9 @@ export default function UserProfileDialog({ open, onOpenChange }: UserProfileDia
               <div className="flex items-center gap-2 text-sm">
                 <MessageCircle className="w-4 h-4 text-muted-foreground" />
                 <span className="text-muted-foreground">User ID:</span>
-                <span className="font-mono text-xs bg-muted px-2 py-1 rounded">{identity.id.slice(-8)}...</span>
+                <span className="font-mono text-xs bg-muted px-2 py-1 rounded">
+                  {identity.id.slice(-8)}...
+                </span>
               </div>
             </CardContent>
           </Card>
@@ -103,7 +122,7 @@ export default function UserProfileDialog({ open, onOpenChange }: UserProfileDia
                   validation.valid ? "text-green-600" : "text-red-600"
                 }`}
               >
-                {validation.message}
+                {loading ? "Checking..." : validation.message}
               </p>
             )}
             <p className="text-xs text-muted-foreground">
@@ -112,11 +131,21 @@ export default function UserProfileDialog({ open, onOpenChange }: UserProfileDia
           </div>
 
           <div className="flex gap-3 pt-2">
-            <Button type="button" variant="outline" onClick={handleCancel} className="flex-1 bg-transparent">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleCancel}
+              className="flex-1 bg-transparent"
+              disabled={loading}
+            >
               Cancel
             </Button>
-            <Button onClick={handleSave} className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground">
-              Save Changes
+            <Button
+              onClick={handleSave}
+              className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground"
+              disabled={loading || !displayName.trim()}
+            >
+              {loading ? "Saving..." : "Save Changes"}
             </Button>
           </div>
         </div>
