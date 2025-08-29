@@ -5,19 +5,15 @@ import { supabase } from "@/lib/supabase/client"
 export async function validateDisplayName(displayName: string, currentUserId: string) {
   const cleanName = displayName.trim()
 
-  // 1. Disallow empty names
   if (!cleanName) {
     return { valid: false, message: "Display name cannot be empty." }
   }
 
-
-  console.log(cleanName, currentUserId);
-  
-  // 2. Case-insensitive check if the display name is already taken
+  // Case-insensitive uniqueness check
   const { data: taken, error } = await supabase
     .from("registered_users")
     .select("user_id")
-    .ilike("display_name", cleanName) // ignores case
+    .ilike("display_name", cleanName)
     .maybeSingle()
 
   if (error) {
@@ -31,6 +27,5 @@ export async function validateDisplayName(displayName: string, currentUserId: st
     return { valid: false, message: "This name is already taken." }
   }
 
-  // ✅ All good
   return { valid: true, message: "Name is available." }
 }

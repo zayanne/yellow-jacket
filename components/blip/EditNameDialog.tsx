@@ -44,8 +44,19 @@ export default function EditNameDialog({ open, onOpenChange }: EditNameDialogPro
     setLoading(false)
   }
 
-  const handleSave = () => {
-    if (!isValid || !name.trim()) return
+  const handleSave = async () => {
+    if (!name.trim()) return
+
+    // 🔒 Final validation before save
+    setLoading(true)
+    const result = await validateDisplayName(name, identity.id)
+    setValidationMessage(result.message)
+    setIsValid(result.valid)
+    setLoading(false)
+
+    if (!result.valid) return // 🚫 stop if invalid
+
+    // ✅ Update only after passing validation
     updateDisplayName(name)
     onOpenChange(false)
   }
@@ -94,10 +105,10 @@ export default function EditNameDialog({ open, onOpenChange }: EditNameDialogPro
           </Button>
           <Button
             onClick={handleSave}
-            disabled={!isValid || !name.trim()}
+            disabled={loading || !name.trim()}
             className="bg-gradient-to-r from-primary to-primary-glow hover:from-primary-glow hover:to-primary shadow-[var(--shadow-send)]"
           >
-            Save Changes
+            {loading ? "Saving..." : "Save Changes"}
           </Button>
         </DialogFooter>
       </DialogContent>
