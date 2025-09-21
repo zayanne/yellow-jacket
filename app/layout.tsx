@@ -2,9 +2,9 @@ import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import "./globals.css"
 import { UserProvider } from "@/contexts/user-context"
-import AppLayout from "@/components/app-layout"
 import { ThemeProvider } from "@/components/theme-provider" // 👈 add this
 import { Toaster } from "@/components/ui/sonner"
+import AppLayout from "@/components/layouts/app-layout"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

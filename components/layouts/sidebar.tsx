@@ -6,8 +6,8 @@ import { cn } from "@/lib/utils"
 import Link from "next/link"
 import { useState } from "react"
 import { usePathname } from "next/navigation"
-import PostComposerDialog from "./post-composer-dialog"
-import UserProfileDialog from "./user-profile-dialog"
+import PostComposerDialog from "../post-composer-dialog"
+import UserProfileDialog from "../user-profile-dialog"
 
 export default function Sidebar() {
   const pathname = usePathname() // ✅ detect current route

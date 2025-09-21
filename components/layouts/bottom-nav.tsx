@@ -5,8 +5,9 @@ import Link from "next/link"
 import { Home, PlusCircle, MessageCircle, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import PostComposerDialog from "./post-composer-dialog"
-import UserProfileDialog from "./user-profile-dialog"
+import PostComposerDialog from "../post-composer-dialog"
+import UserProfileDialog from "../user-profile-dialog"
+
 
 
 interface BottomNavProps {
