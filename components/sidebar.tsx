@@ -1,6 +1,6 @@
 "use client"
 
-import { Home, PlusCircle, MessageCircle, User } from "lucide-react"
+import { Home, PlusCircle, MessageCircle, User, Video } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
@@ -15,6 +15,8 @@ export default function Sidebar() {
   const menuItems = [
     { id: "home", label: "Home", icon: Home, href: "/" },
     { id: "blip", label: "Blip", icon: MessageCircle, href: "/blip" },
+    // { id: "vchat", label: "VChat", icon: Video, href: "/v-chat" },
+
   ]
 
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)

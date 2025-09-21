@@ -32,7 +32,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
     }
   }, [])
 
-  const blip = pathname === "/blip"
+const blip = pathname.startsWith("/blip/")
 
 
 

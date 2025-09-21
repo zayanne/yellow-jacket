@@ -56,7 +56,7 @@ export default function BlipBox() {
               variant="ghost"
               size="icon"
               className="bg-transparent"
-              onClick={() => router.push("/")}
+              onClick={() => router.push("/blip")}
             >
               <ArrowLeft className="h-5 text-foreground" />
             </Button>
