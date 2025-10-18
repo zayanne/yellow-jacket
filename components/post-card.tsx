@@ -85,7 +85,8 @@ export default function PostCard({ post }: PostCardProps) {
         setUserInteraction("disliked")
       }
     } catch (error) {
-      // No interaction found, which is expected
+      console.log(error);
+      
     }
   }
 

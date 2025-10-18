@@ -126,7 +126,8 @@ export default function UserProfileDialog({ open, onOpenChange }: UserProfileDia
               </p>
             )}
             <p className="text-xs text-muted-foreground">
-              This name will be used for your posts and comments. Leave empty to remain "Anonymous".
+              This name will be used for your posts and comments. Leave empty to remain &quot;Anonymous&quot;.
+              
             </p>
           </div>
 

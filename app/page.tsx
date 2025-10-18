@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react"
 import PostFeed from "@/components/post-feed"
-import PostComposerDialog from "@/components/post-composer-dialog"
-import UserProfileDialog from "@/components/user-profile-dialog"
+// import PostComposerDialog from "@/components/post-composer-dialog"
+// import UserProfileDialog from "@/components/user-profile-dialog"
 import bcrypt from "bcryptjs";
 
 async function generateHash(password: string, key: string) {
@@ -12,8 +12,8 @@ async function generateHash(password: string, key: string) {
 }
 
 export default function Home() {
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
-  const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false)
+  // const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+  // const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false)
 
   const [hash, setHash] = useState<string>("");
 

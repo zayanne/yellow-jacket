@@ -75,7 +75,7 @@ export default function ShareModal({
       })
     } catch (error) {
       toast.error("Failed to copy",{
-        description: "Could not copy link to clipboard.",
+        description: `Could not copy link to clipboard: ${error}`,
       })
     }
   }

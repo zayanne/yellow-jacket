@@ -33,7 +33,7 @@ export default function PostComposerDialog({ open, onOpenChange, onPostCreated }
 
   const characterCount = content.length
   const isValidLength = characterCount > 0 && characterCount <= 200
-  const remainingChars = 200 - characterCount
+  // const remainingChars = 200 - characterCount
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
